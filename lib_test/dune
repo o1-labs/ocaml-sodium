@@ -1,6 +1,6 @@
 (executable
   (name test_sodium)
-  (libraries oUnit sodium)
+  (libraries ounit2 sodium)
   (flags :standard -w -27))
 
 (alias
