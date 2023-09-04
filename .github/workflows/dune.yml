@@ -1,0 +1,27 @@
+name: ocaml-sodium
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up OCaml
+      uses: ocaml/setup-ocaml@v2
+      with:
+        ocaml-compiler: 4.13.1
+        dune-cache: true
+
+    - name: Install OCaml deps
+      run: opam install . --deps-only --with-test
+      
+    - name: Build
+      run: opam exec -- dune build
+
+    - name: Test
+      run: opam exec -- dune runtest

@@ -23,12 +23,12 @@ depends: [
   "ocamlfind" {build}
   "ocamlbuild" {build}
   "ctypes" {>= "0.6.0"}
+  "ounit2" {with-test & >= "2.2.6"}
 ]
 depexts: [
-  [ ["debian"] ["libsodium-dev"] ]
-  [ ["ubuntu"] ["libsodium-dev"] ]
-  [ ["freebsd"] ["security/libsodium"] ]
-  [ ["macos" "homebrew"] ["libsodium"] ]
+   ["libsodium-dev"] {os-family = "debian"} 
+   ["security/libsodium"] {os-family = "freebsd"} 
+   ["libsodium"] {os-distribution = "homebrew" & os = "macos"} 
 ]
 post-messages: [
   "This package requires installation of libsodium-dev (>= 1.0.9)"
