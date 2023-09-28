@@ -1,7 +1,8 @@
 (library
   (name sodium_generated)
   (public_name sodium.generated)
-  (c_library_flags :standard -lsodium)
+  (c_flags (:include ../config/c_flags.sexp))
+  (c_library_flags (:include ../config/c_library_flags.sexp))
   (libraries ctypes.stubs sodium_bindings)
   (modules sodium_generated)
   (c_names sodium_stubs))
@@ -38,7 +39,7 @@
 (rule
   (deps sodium_types_detect.c)
   (targets sodium_types_detect)
-  (action (bash "cc -I \"$(ocamlfind query ctypes)\" -I \"$(ocamlc -where)\" -o sodium_types_detect sodium_types_detect.c")))
+  (action (bash "cc -I \"$(ocamlfind query ctypes)\" -I \"$(ocamlc -where)\" $(pkg-config --cflags libsodium) -o sodium_types_detect sodium_types_detect.c")))
 
 (rule
   (deps sodium_types_detect)
