@@ -22,7 +22,7 @@ depends: [
   "base-bytes"
   "ocamlfind" {build}
   "ocamlbuild" {build}
-  "ctypes" {>= "0.6.0"}
+  "ctypes" {>= "0.13.0"}
   "ounit2" {with-test & >= "2.2.6"}
 ]
 depexts: [
