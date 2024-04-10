@@ -3,7 +3,21 @@ open Ocamlbuild_pack;;
 
 let ctypes_libdir = Sys.getenv "CTYPES_LIB_DIR" in
 let ocaml_libdir = Sys.getenv "OCAML_LIB_DIR" in
-
+let lsodium =
+  let cwd = Unix.getcwd () in
+  let uname_chan = Unix.open_process_in "uname" in
+  let l = input_line uname_chan in
+  match l with
+  | "Darwin" -> [A "-cclib"; A "-lsodium"]
+  | "Linux" ->
+      [ A "-cclib"
+      ; A "-Wl,--push-state,-Bstatic"
+      ; A "-cclib"
+      ; A "-lsodium"
+      ; A "-cclib"
+      ; A "-Wl,--pop-state" ]
+  | s -> failwith (Printf.sprintf "don't know how to link on %s yet" s)
+in
 dispatch begin
   function
   | After_rules ->
@@ -59,7 +73,7 @@ dispatch begin
     (* Linking sodium *)
     flag ["c"; "compile"; "use_sodium"] &
       S[A"-ccopt"; A"--std=c99 -Wall -pedantic -Werror -Wno-pointer-sign"];
-    flag ["c"; "ocamlmklib"; "use_sodium"] & A"-lsodium";
+    flag ["c"; "ocamlmklib"; "use_sodium"] & S lsodium;
 
     (* Linking generated stubs *)
     dep ["ocaml"; "link"; "byte"; "library"; "use_sodium_stubs"]
@@ -70,7 +84,7 @@ dispatch begin
     dep ["ocaml"; "link"; "native"; "library"; "use_sodium_stubs"]
       ["lib/libsodium_stubs"-.-(!Options.ext_lib)];
     flag ["ocaml"; "link"; "native"; "library"; "use_sodium_stubs"] &
-      S[A"-cclib"; A"-lsodium_stubs"; A"-cclib"; A"-lsodium"];
+      S (List.append [A"-cclib"; A"-lsodium_stubs"] lsodium);
 
     (* Linking tests *)
     flag ["ocaml"; "link"; "byte"; "program"; "use_sodium_stubs"] &
@@ -78,7 +92,7 @@ dispatch begin
     dep ["ocaml"; "link"; "native"; "program"; "use_sodium_stubs"]
       ["lib/libsodium_stubs"-.-(!Options.ext_lib)];
     flag ["ocaml"; "link"; "native"; "program"; "use_sodium_stubs"] &
-      S[A"-cclib"; A"-lsodium"];
+      S lsodium;
 
   | _ -> ()
 end;;
