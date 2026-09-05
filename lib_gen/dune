@@ -1,11 +1,28 @@
+; Two stanzas, identical but for `(no_dynlink)`, selected by SODIUM_STATIC.
+; dune cannot make a field conditional on the environment, but it can enable a
+; whole stanza, and a disabled one does not clash on name or modules.
 (library
   (name sodium_generated)
   (public_name sodium.generated)
-  (c_flags (:include ../config/c_flags.sexp))
+  (enabled_if (and (<> %{env:SODIUM_STATIC=0} 0) (<> %{env:SODIUM_STATIC=0} "")))
   (c_library_flags (:include ../config/c_library_flags.sexp))
+  (library_flags (:include ../config/library_flags.sexp))
+  (no_dynlink)
   (libraries ctypes.stubs sodium_bindings)
   (modules sodium_generated)
-  (c_names sodium_stubs))
+  (foreign_stubs (language c) (names sodium_stubs)
+    (flags (:include ../config/c_flags.sexp))))
+
+(library
+  (name sodium_generated)
+  (public_name sodium.generated)
+  (enabled_if (or (= %{env:SODIUM_STATIC=0} 0) (= %{env:SODIUM_STATIC=0} "")))
+  (c_library_flags (:include ../config/c_library_flags.sexp))
+  (library_flags (:include ../config/library_flags.sexp))
+  (libraries ctypes.stubs sodium_bindings)
+  (modules sodium_generated)
+  (foreign_stubs (language c) (names sodium_stubs)
+    (flags (:include ../config/c_flags.sexp))))
 
 (library
   (name sodium_bindings)
@@ -21,12 +38,14 @@
 
 (executable
   (name sodium_bindgen)
+  (modes byte exe)
   (libraries ctypes ctypes.stubs sodium_bindings sodium_storage)
   (modules sodium_bindgen)
   (flags :standard -w -33))
 
 (executable
   (name sodium_typegen)
+  (modes byte exe)
   (libraries ctypes ctypes.stubs sodium_types)
   (modules sodium_typegen)
   (flags :standard -w -33))

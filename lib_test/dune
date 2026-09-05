@@ -3,8 +3,8 @@
   (libraries ounit2 sodium)
   (flags :standard -w -27))
 
-(alias
-  (name runtest)
+(rule
+  (alias runtest)
   (deps nacl_runner)
   (action (run ./test_sodium.exe)))
 
